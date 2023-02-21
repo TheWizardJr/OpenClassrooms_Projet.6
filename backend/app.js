@@ -1,19 +1,23 @@
-// Ajout d'express
+require('dotenv').config();
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+// Connection à la base de données
+require('./mongo');
 
-app.listen(port, () => {
-    console.log(`Exemple d'application écoutant sur le port ${port}`);
-})
+// Controllers
+const {createUser, logUser} = require('./controllers/users');
 
-// Connection à la base de donnée mongoose
-const mongoose = require('mongoose');
-const uri = "mongodb+srv://TheWizardJr:8WOaCFd9HEYhiLOg@cluster0.ygycrtd.mongodb.net/?retryWrites=true&w=majority"
-mongoose.connect(uri)
-  .then((() => console.log("Connecté à Mongo !")))
-  .catch(err => console.error("Erreur de connection à Mongo : ",err))
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.post("/api/auth/signup", createUser);
+app.post("/api/auth/login", logUser);
+app.get("/", (req, res) => res.send("Hello World"));
+
+//Listen
+app.listen(port, () => console.log(`Exemple d'application écoutant sur le port ${port}`));
