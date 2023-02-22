@@ -7,7 +7,7 @@ require("./mongo");
 
 // Controllers
 const { createUser, logUser } = require("./controllers/users");
-const { getSauces, createSauces, getSaucesById } = require("./controllers/sauces");
+const { getSauces, createSauce, getSauceById, deleteSauce } = require("./controllers/sauces");
 
 // Middleware
 const { authenticateUser } = require("./middleware/auth");
@@ -17,8 +17,9 @@ const { upload } = require("./middleware/multer");
 app.post("/api/auth/signup", createUser);
 app.post("/api/auth/login", logUser);
 app.get("/api/sauces", authenticateUser, getSauces);
-app.post("/api/sauces", authenticateUser, upload.single("image"), createSauces);
-app.get("/api/sauces/:id", authenticateUser, getSaucesById);
+app.post("/api/sauces", authenticateUser, upload.single("image"), createSauce);
+app.get("/api/sauces/:id", authenticateUser, getSauceById);
+app.delete("/api/sauces/:id", authenticateUser, deleteSauce);
 app.get("/", (req, res) => res.send("Hello World"));
 
 //Listen

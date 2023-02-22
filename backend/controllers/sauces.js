@@ -1,4 +1,5 @@
 const { Sauce } = require("../mongo");
+const unlink = require("fs").promises.unlink;
 
 function getSauces(req, res) {
   Sauce.find({})
@@ -6,14 +7,14 @@ function getSauces(req, res) {
     .catch((error) => res.status(500).send(error));
 }
 
-function getSaucesById(req, res) {
-    const { id } = req.params;
-    Sauce.findById(id)
+function getSauceById(req, res) {
+  const { id } = req.params;
+  Sauce.findById(id)
     .then((sauce) => res.status(200).send(sauce))
     .catch((error) => res.status(500).send(error));
 }
 
-function createSauces(req, res) {
+function createSauce(req, res) {
   const { body, file } = req;
   const { fileName } = file;
   const bodySauce = JSON.parse(req.body.sauce);
@@ -34,14 +35,27 @@ function createSauces(req, res) {
   sauce
     .save()
     .then((message) => {
-      res.status(201).send({ message: message });
-      return console.log("Produit enregistré", message);
+      res.status(201).send({ message: sauce });
     })
-    .catch((error) => res.status(500).send(error));
+    .catch((error) => res.status(500).send({ message: error }));
+}
+
+function deleteSauce(req, res) {
+  const { id } = req.params;
+  Sauce.findByIdAndDelete(id)
+    .then(deleteImage)
+    .then((sauce) => res.send({ message: sauce }))
+    .catch((err) => res.status(500).send({ message: err }));
+}
+
+function deleteImage(sauce) {
+  const imageUrl = sauce.imageUrl;
+  const fileToDelete = imageUrl.split("/")[4];
+  return unlink(`images/${fileToDelete}`).then(() => sauce);
 }
 
 function makeImgUrl(req, fileName) {
   return req.protocol + "://" + req.get("host") + "/images/" + fileName;
 }
 
-module.exports = { getSauces, createSauces, getSaucesById };
+module.exports = { getSauces, createSauce, getSauceById, deleteSauce };
