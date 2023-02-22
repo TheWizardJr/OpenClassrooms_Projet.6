@@ -24,7 +24,10 @@ function createSauces(req, res) {
   });
   product
     .save()
-    .then((res) => console.log("Produit enregistré", res))
+    .then((message) => {
+      res.status(201).send({ message: message });
+      return console.log("Produit enregistré", message);
+    })
     .catch(console.error);
 }
 
