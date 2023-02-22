@@ -7,7 +7,7 @@ require("./mongo");
 
 // Controllers
 const { createUser, logUser } = require("./controllers/users");
-const { getSauces, createSauces } = require("./controllers/sauces");
+const { getSauces, createSauces, getSaucesById } = require("./controllers/sauces");
 
 // Middleware
 const { authenticateUser } = require("./middleware/auth");
@@ -18,6 +18,7 @@ app.post("/api/auth/signup", createUser);
 app.post("/api/auth/login", logUser);
 app.get("/api/sauces", authenticateUser, getSauces);
 app.post("/api/sauces", authenticateUser, upload.single("image"), createSauces);
+app.get("/api/sauces/:id", authenticateUser, getSaucesById);
 app.get("/", (req, res) => res.send("Hello World"));
 
 //Listen
