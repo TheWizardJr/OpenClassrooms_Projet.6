@@ -1,0 +1,35 @@
+const { Product } = require("../mongo");
+
+function getSauces(req, res) {
+  Product.find({}).then((sauces) => res.send(sauces));
+}
+
+function createSauces(req, res) {
+  const { body, file } = req;
+  const { fileName } = file;
+  const sauce = JSON.parse(req.body.sauce);
+  const { userId, name, manufacturer, description, mainPepper, heat } = sauce;
+  const product = new Product({
+    userId,
+    name,
+    manufacturer,
+    description,
+    mainPepper,
+    imageUrl: makeImgUrl(req, fileName),
+    heat,
+    likes: 0,
+    dislikes: 0,
+    usersLiked: [],
+    usersDisliked: [],
+  });
+  product
+    .save()
+    .then((res) => console.log("Produit enregistré", res))
+    .catch(console.error);
+}
+
+function makeImgUrl(req, fileName) {
+  return req.protocol + "://" + req.get("host") + "/images/" + fileName;
+}
+
+module.exports = { getSauces, createSauces };

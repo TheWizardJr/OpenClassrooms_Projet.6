@@ -1,23 +1,27 @@
-require('dotenv').config();
-const express = require("express");
-const app = express();
-const cors = require("cors");
+const { app, express } = require("./server");
 const port = 3000;
+const path = require("path");
 
 // Connection à la base de données
-require('./mongo');
+require("./mongo");
 
 // Controllers
-const {createUser, logUser} = require('./controllers/users');
+const { createUser, logUser } = require("./controllers/users");
+const { getSauces, createSauces } = require("./controllers/sauces");
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+const { authenticateUser } = require("./middleware/auth");
+const { upload } = require("./middleware/multer");
 
 // Routes
 app.post("/api/auth/signup", createUser);
 app.post("/api/auth/login", logUser);
+app.get("/api/sauces", authenticateUser, getSauces);
+app.post("/api/sauces", authenticateUser, upload.single("image"), createSauces);
 app.get("/", (req, res) => res.send("Hello World"));
 
 //Listen
-app.listen(port, () => console.log(`Exemple d'application écoutant sur le port ${port}`));
+app.use("/images", express.static(path.join(__dirname, "images")));
+app.listen(port, () =>
+  console.log(`Exemple d'application écoutant sur le port ${port}`)
+);

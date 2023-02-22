@@ -18,4 +18,20 @@ userSchema.plugin(uniqueValidator);
 
 const User = mongoose.model("User", userSchema);
 
-module.exports = { mongoose, User };
+const productSchema = new mongoose.Schema({
+  userId: String,
+  name: String,
+  manufacturer: String,
+  description: String,
+  mainPepper: String,
+  imageUrl: String,
+  heat: Number,
+  likes: Number,
+  dislikes: Number,
+  usersLiked: ["String <userId>"],
+  usersDisliked: ["String <userId>"],
+});
+
+const Product = mongoose.model("Sauce", productSchema);
+
+module.exports = { mongoose, User, Product };
