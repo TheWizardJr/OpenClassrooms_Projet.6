@@ -34,10 +34,31 @@ function createSauce(req, res) {
   });
   sauce
     .save()
-    .then((message) => {
-      res.status(201).send({ message: sauce });
-    })
+    .then((sauce) => res.status(201).send({ message: sauce }))
     .catch((error) => res.status(500).send({ message: error }));
+}
+
+function modifySauce(req, res) {
+  const { id } = req.params;
+  const hasNewImage = req.file != null;
+  const payload = makePayload(hasNewImage, req)
+  Sauce.findByIdAndUpdate(id, payload)
+    .then((sauce) => sendClientResponse(sauce, res))
+    .catch((error) => res.status(500).send({ message: error }));
+}
+
+function makePayload(hasNewImage, req) {
+  if  (!hasNewImage) return req.body;
+  const payload = JSON.parse(req.body.sauce);
+  payload.imageUrl = makeImgUrl(req, req.file.fileName);
+  return payload;
+}
+
+function sendClientResponse(sauce, res) {
+  if (sauce == null) {
+   return res.status(404).send({ message: "Sauce non trouvée" });
+  }
+  res.status(200).send({ message: "Sauce modifiée avec succès" });
 }
 
 function deleteSauce(req, res) {
@@ -58,4 +79,4 @@ function makeImgUrl(req, fileName) {
   return req.protocol + "://" + req.get("host") + "/images/" + fileName;
 }
 
-module.exports = { getSauces, createSauce, getSauceById, deleteSauce };
+module.exports = { getSauces, createSauce, getSauceById, deleteSauce, modifySauce };
