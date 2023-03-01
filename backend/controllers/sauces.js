@@ -44,6 +44,7 @@ function modifySauce(req, res) {
   const payload = makePayload(hasNewImage, req)
   Sauce.findByIdAndUpdate(id, payload)
     .then((sauce) => sendClientResponse(sauce, res))
+    .then((sauce) => deleteImageWhenModify(sauce, hasNewImage))
     .catch((error) => res.status(500).send({ message: error }));
 }
 
@@ -55,24 +56,30 @@ function makePayload(hasNewImage, req) {
 }
 
 function sendClientResponse(sauce, res) {
-  if (sauce == null) {
-   return res.status(404).send({ message: "Sauce non trouvée" });
-  }
-  res.status(200).send({ message: "Sauce modifiée avec succès" });
+  if (sauce == null) return res.status(404).send({ message: "Sauce non trouvée" });
+  return Promise.resolve(res.status(200).send({ message: "Sauce modifiée avec succès" }))
+  .then(() => sauce);
 }
 
 function deleteSauce(req, res) {
   const { id } = req.params;
   Sauce.findByIdAndDelete(id)
-    .then(deleteImage)
+    .then((sauce) => deleteImage(sauce))
     .then((sauce) => res.send({ message: sauce }))
     .catch((err) => res.status(500).send({ message: err }));
 }
 
 function deleteImage(sauce) {
-  const imageUrl = sauce.imageUrl;
-  const fileToDelete = imageUrl.split("/")[4];
-  return unlink(`images/${fileToDelete}`).then(() => sauce);
+  const imageToDelete = sauce.imageUrl;
+  const fileToDelete = imageToDelete.split("/")[4];
+  return unlink(`images/${fileToDelete}`);
+}
+
+function deleteImageWhenModify(sauce, hasNewImage) {
+  if (!hasNewImage) return
+  const imageToDelete = sauce.imageUrl;
+  const fileToDelete = imageToDelete.split("/")[4];
+  return unlink (`images/${fileToDelete}`);
 }
 
 function makeImgUrl(req, fileName) {
