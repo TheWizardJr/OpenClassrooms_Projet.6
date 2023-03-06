@@ -86,4 +86,32 @@ function makeImgUrl(req, fileName) {
   return req.protocol + "://" + req.get("host") + "/images/" + fileName;
 }
 
-module.exports = { getSauces, createSauce, getSauceById, deleteSauce, modifySauce };
+function likeSauce(req, res) {
+  const { id } = req.params;
+  const { userId, like } = req.body;
+  Sauce.findById(id)
+    .then((sauce) => {
+      if (like === 1) {
+        sauce.likes++;
+        sauce.usersLiked.push(userId);
+      } else if (like === -1) {
+        sauce.dislikes++;
+        sauce.usersDisliked.push(userId);
+      } else {
+        if (sauce.usersLiked.includes(userId)) {
+          sauce.likes--;
+          sauce.usersLiked.splice(sauce.usersLiked.indexOf(userId), 1);
+        } else if (sauce.usersDisliked.includes(userId)) {
+          sauce.dislikes--;
+          sauce.usersDisliked.splice(sauce.usersDisliked.indexOf(userId), 1);
+        }
+      }
+      sauce
+        .save()
+        .then((sauce) => res.status(200).send({ message: sauce }))
+        .catch((error) => res.status(500).send({ message: error }));
+    })
+    .catch((error) => res.status(500).send({ message: error }));
+}
+
+module.exports = { getSauces, createSauce, getSauceById, deleteSauce, modifySauce, likeSauce };
